@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https: http: data:; connect-src https: http:; style-src 'self' 'unsafe-inline'">
+<title>Pin cameras</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; padding: 16px; font: 13px -apple-system, "Segoe UI", sans-serif; background: Canvas; color: CanvasText; }
+  h1 { font-size: 14px; margin: 0 0 4px; }
+  p { margin: 0 0 12px; opacity: .65; }
+  #list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cam { position: relative; border: 2px solid transparent; border-radius: 8px; overflow: hidden; cursor: pointer; background: #111; aspect-ratio: 16 / 9; padding: 0; }
+  .cam img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cam span { position: absolute; left: 6px; bottom: 6px; padding: 2px 8px; border-radius: 4px; color: #fff; background: rgba(0,0,0,.6); text-transform: capitalize; }
+  .cam b { position: absolute; right: 6px; top: 6px; padding: 2px 8px; border-radius: 999px; color: #fff; background: #e65028; display: none; }
+  .cam.on { border-color: #e65028; }
+  .cam.on b { display: block; }
+</style>
+</head>
+<body>
+<h1>Pin cameras</h1>
+<p>Click a camera to keep it open. Click again to unpin.</p>
+<div id="list"></div>
+<script src="picker.js"></script>
+</body>
+</html>

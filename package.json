@@ -1,0 +1,45 @@
+{
+  "name": "vibed_frigate_mqtt_monitor",
+  "productName": "Vibed Frigate MQTT Monitor",
+  "version": "0.1.0",
+  "description": "Shows Frigate camera feeds when a person is detected",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/",
+    "demo": "node scripts/demo.js",
+    "icons": "electron scripts/make-icons.js",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "build": {
+    "appId": "dev.local.vibed-frigate-mqtt-monitor",
+    "productName": "Vibed Frigate MQTT Monitor",
+    "files": [
+      "src/**",
+      "assets/**",
+      "package.json"
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.utilities",
+      "extendInfo": {
+        "LSUIElement": true
+      },
+      "icon": "assets/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    }
+  },
+  "dependencies": {
+    "mqtt": "^5.16.1"
+  },
+  "devDependencies": {
+    "aedes": "^1.2.0",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  }
+}

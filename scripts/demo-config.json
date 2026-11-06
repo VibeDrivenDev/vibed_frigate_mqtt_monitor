@@ -1,0 +1,4 @@
+{
+  "mqtt": { "host": "127.0.0.1", "port": 18830, "anonymous": true },
+  "detection": { "holdSeconds": 5 }
+}

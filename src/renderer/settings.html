@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>Settings</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; padding: 16px 20px 80px; font: 13px -apple-system, "Segoe UI", sans-serif; background: Canvas; color: CanvasText; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; opacity: .6; margin: 22px 0 8px; }
+  label.row { display: grid; grid-template-columns: 170px 1fr; align-items: center; gap: 10px; margin: 6px 0; }
+  input[type=text], input[type=number], input[type=password], select { width: 100%; box-sizing: border-box; padding: 5px 8px; font: inherit; }
+  label.row input[type=checkbox] { justify-self: start; }
+  .hint { opacity: .6; font-size: 12px; margin: 2px 0 0 180px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-weight: 600; padding: 4px 6px; }
+  td { padding: 4px 6px; }
+  td input[type=text], td input[type=number] { width: 100%; }
+  footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 20px; background: Canvas; border-top: 1px solid rgba(128,128,128,.3); display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+  #msg { margin-right: auto; opacity: .7; }
+  button { font: inherit; padding: 5px 16px; }
+  #banner { margin: 0 0 8px; padding: 10px 12px; border-radius: 6px; background: rgba(230,80,40,.15); border: 1px solid #e65028; }
+  .bad { outline: 2px solid #e65028; }
+</style>
+</head>
+<body>
+<div id="banner" hidden></div>
+<h2>MQTT</h2>
+<label class="row">Host <input id="mqtt-host" type="text"></label>
+<label class="row">Port <input id="mqtt-port" type="number"></label>
+<label class="row">Broker needs no login <input id="mqtt-anonymous" type="checkbox"></label>
+<label class="row">Username <input id="mqtt-username" type="text"></label>
+<label class="row">Password <input id="mqtt-password" type="password" autocomplete="off"></label>
+<div class="hint" id="pw-hint"></div>
+<label class="row">Topic prefix <input id="mqtt-topicPrefix" type="text"></label>
+
+<h2>Frigate</h2>
+<label class="row">Server URL <input id="frigate-baseUrl" type="text"></label>
+<label class="row">Stream name <input id="frigate-streamTemplate" type="text"></label>
+<div class="hint">Use {camera} for the camera name.</div>
+
+<h2>Detection (all cameras)</h2>
+<label class="row">Labels <input id="det-labels" type="text"></label>
+<div class="hint">Comma separated. Example: person, dog</div>
+<label class="row">Hold time (seconds) <input id="det-hold" type="number" min="0"></label>
+<label class="row">Zones <input id="det-zones" type="text"></label>
+<div class="hint">Comma separated. Leave empty to react to any zone.</div>
+
+<h2>Cameras</h2>
+<table>
+  <thead><tr><th>Camera</th><th>On</th><th>Hold (s)</th><th>Labels</th><th>Zones</th></tr></thead>
+  <tbody id="cams"></tbody>
+</table>
+<div class="hint" style="margin-left:6px">Leave a field empty to use the global value.</div>
+
+<h2>Window</h2>
+<label class="row">Corner
+  <select id="win-corner"><option>bottom-right</option><option>bottom-left</option><option>top-right</option><option>top-left</option></select>
+</label>
+<label class="row">Max width (% of screen) <input id="win-maxWidth" type="number" step="any" min="10" max="100"></label>
+<label class="row">Max height (% of screen) <input id="win-maxHeight" type="number" step="any" min="10" max="100"></label>
+<label class="row">Margin (pixels) <input id="win-margin" type="number" min="0"></label>
+
+<h2>System</h2>
+<label class="row">Start at login <input id="login" type="checkbox"></label>
+<div class="hint" id="login-hint"></div>
+
+<footer><span id="msg"></span><button id="close">Close</button><button id="save">Save</button></footer>
+<script src="settings.js"></script>
+</body>
+</html>
