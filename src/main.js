@@ -30,6 +30,7 @@ function migrateLegacySettings() {
   }
 }
 let paused = false;
+let disabled = false;
 let client = null;
 let win = null;
 let tray = null;
@@ -79,7 +80,7 @@ function openPicker() {
 }
 
 async function reconcileEvents() {
-  if (paused || !cfg.frigate.baseUrl) return;
+  if (paused || disabled || !cfg.frigate.baseUrl) return;
   try {
     const res = await net.fetch(`${cfg.frigate.baseUrl.replace(/\/$/, '')}/api/events?in_progress=1&limit=100`);
     if (!res.ok) return;
@@ -102,7 +103,7 @@ function applyLoginItem() {
 
 async function reloadConfig() {
   cfg = await loadConfig();
-  tracker.setPinned(cfg.pinned);
+  applyPinned();
   applyLoginItem();
   lastKey = '';
   connect();
@@ -136,7 +137,7 @@ function togglePin(camera, on) {
   else next.delete(camera);
   cfg.pinned = [...next].sort();
   config.save(configFile, { pinned: cfg.pinned });
-  tracker.setPinned(cfg.pinned);
+  applyPinned();
   render();
   buildMenu();
 }
@@ -244,7 +245,7 @@ function connect() {
   client.on('close', () => setStatus('disconnected'));
   client.on('error', (e) => setStatus(`error: ${e.message}`));
   client.on('message', (t, buf) => {
-    if (paused || t !== topic) return;
+    if (paused || disabled || t !== topic) return;
     try {
       tracker.handleEvent(JSON.parse(buf.toString()));
       render();
@@ -270,6 +271,19 @@ function setPaused(value) {
   buildMenu();
 }
 
+function applyPinned() {
+  tracker.setPinned(disabled ? [] : cfg.pinned);
+}
+
+function setDisabled(value) {
+  disabled = value;
+  applyPinned();
+  if (disabled) tracker.reset();
+  else reconcileEvents();
+  render();
+  buildMenu();
+}
+
 function setDisplay(display) {
   config.save(configFile, { window: { display } });
   cfg.window.display = display;
@@ -285,6 +299,7 @@ function buildMenu() {
     Menu.buildFromTemplate([
       { label: `MQTT ${status}`, enabled: false },
       { label: 'Pause', type: 'checkbox', checked: paused, click: (i) => setPaused(i.checked) },
+      { label: 'Disable (pause and hide pinned)', type: 'checkbox', checked: disabled, click: (i) => setDisabled(i.checked) },
       {
         label: 'Show on display',
         submenu: [
@@ -364,7 +379,7 @@ app.whenReady().then(async () => {
   tray.setToolTip(app.getName());
   migrateLegacySettings();
   cfg = await loadConfig();
-  tracker.setPinned(cfg.pinned);
+  applyPinned();
   applyLoginItem();
   buildMenu();
   connect();

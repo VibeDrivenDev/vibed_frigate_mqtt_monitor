@@ -127,6 +127,7 @@ The window takes keyboard focus only while a tile is enlarged. This makes the Es
 |---|---|
 | `MQTT <status>` | Shows the connection state. You cannot click it. |
 | Pause | Stops detection popups. Pinned cameras stay open. |
+| Disable (pause and hide pinned) | Stops detection popups and hides all pinned cameras. Clear the check to show the pinned cameras again. The setting is not saved. The app starts enabled. |
 | Show on display | Moves the feed window to the primary display or to another display. The app saves the choice. |
 | Pin cameras... | Opens the pin picker. |
 | Settings... | Opens the settings window. |
