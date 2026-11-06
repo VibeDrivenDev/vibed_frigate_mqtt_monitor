@@ -1,7 +1,7 @@
 {
   "name": "vibed_frigate_mqtt_monitor",
   "productName": "Vibed Frigate MQTT Monitor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shows Frigate camera feeds when a person is detected",
   "main": "src/main.js",
   "private": true,
