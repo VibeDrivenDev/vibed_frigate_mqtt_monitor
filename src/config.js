@@ -8,6 +8,8 @@ const DEFAULTS = {
   cameras: {},
   pinned: [],
   startAtLogin: false,
+  hotkey: 'CommandOrControl+Alt+Shift+F',
+  disableHotkey: 'CommandOrControl+Alt+Shift+D',
   window: { display: 'primary', corner: 'bottom-right', maxWidth: 1 / 3, maxHeight: 1 / 2, margin: 16 },
 };
 
@@ -43,7 +45,7 @@ function save(file, patch) {
   fs.writeFileSync(file, JSON.stringify(merge(current, patch), null, 2) + '\n');
 }
 
-const SETTINGS_KEYS = ['mqtt', 'frigate', 'detection', 'cameras', 'window', 'startAtLogin'];
+const SETTINGS_KEYS = ['mqtt', 'frigate', 'detection', 'cameras', 'window', 'startAtLogin', 'hotkey', 'disableHotkey'];
 
 function saveSettings(file, settings, { passwordEnc } = {}) {
   const current = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};

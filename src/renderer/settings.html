@@ -61,6 +61,14 @@
 <label class="row">Max height (% of screen) <input id="win-maxHeight" type="number" step="any" min="10" max="100"></label>
 <label class="row">Margin (pixels) <input id="win-margin" type="number" min="0"></label>
 
+<h2>Control</h2>
+<label class="row">Disable <input id="disabled" type="checkbox"></label>
+<div class="hint">Pauses detection and hides all pinned cameras. This takes effect at once. The app starts enabled.</div>
+<label class="row">Menu shortcut <input id="hotkey" type="text" placeholder="CommandOrControl+Alt+Shift+F"></label>
+<div class="hint">Opens the tray menu at the mouse pointer. Leave empty to turn it off. You can also start the app a second time to open this window.</div>
+<label class="row">Disable shortcut <input id="disableHotkey" type="text" placeholder="CommandOrControl+Alt+Shift+D"></label>
+<div class="hint">Turns Disable on and off. Leave empty to turn it off.</div>
+
 <h2>System</h2>
 <label class="row">Start at login <input id="login" type="checkbox"></label>
 <div class="hint" id="login-hint"></div>

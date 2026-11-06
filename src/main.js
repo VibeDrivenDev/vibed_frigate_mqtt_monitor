@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, screen, nativeImage, ipcMain, net, safeStorage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, screen, nativeImage, ipcMain, net, safeStorage, globalShortcut } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const mqtt = require('mqtt');
@@ -21,6 +21,12 @@ async function loadConfig() {
   return loaded;
 }
 let cfg = null;
+
+const gotLock = process.env.SURVEILLANCE_CONFIG ? true : app.requestSingleInstanceLock();
+if (!gotLock) app.quit();
+app.on('second-instance', () => {
+  if (cfg) openSettings();
+});
 
 function migrateLegacySettings() {
   const legacy = path.join(app.getPath('appData'), 'surveillance-popup', 'config.json');
@@ -61,8 +67,18 @@ function allCameras() {
   return [...new Set([...knownCameras, ...cfg.pinned])].sort();
 }
 
+function centerOnCameras(width, height) {
+  const a = pickDisplay().workArea;
+  return {
+    x: Math.round(a.x + Math.max(0, a.width - width) / 2),
+    y: Math.round(a.y + Math.max(0, a.height - height) / 2),
+  };
+}
+
 function openPicker() {
   if (picker && !picker.isDestroyed()) {
+    const p = centerOnCameras(560, 640);
+    picker.setPosition(p.x, p.y);
     picker.show();
     picker.focus();
     return;
@@ -70,6 +86,7 @@ function openPicker() {
   picker = new BrowserWindow({
     width: 560,
     height: 640,
+    ...centerOnCameras(560, 640),
     title: 'Pin cameras',
     minimizable: false,
     maximizable: false,
@@ -105,6 +122,7 @@ async function reloadConfig() {
   cfg = await loadConfig();
   applyPinned();
   applyLoginItem();
+  registerHotkey();
   lastKey = '';
   connect();
   refreshCameras();
@@ -115,6 +133,8 @@ let settingsWin = null;
 
 function openSettings() {
   if (settingsWin && !settingsWin.isDestroyed()) {
+    const p = centerOnCameras(640, 760);
+    settingsWin.setPosition(p.x, p.y);
     settingsWin.show();
     settingsWin.focus();
     return;
@@ -122,6 +142,7 @@ function openSettings() {
   settingsWin = new BrowserWindow({
     width: 640,
     height: 760,
+    ...centerOnCameras(640, 760),
     title: 'Settings',
     minimizable: false,
     maximizable: false,
@@ -271,6 +292,33 @@ function setPaused(value) {
   buildMenu();
 }
 
+let trayMenu = null;
+let hotkeyError = '';
+
+function showMenuAtCursor() {
+  if (tray && trayMenu) tray.popUpContextMenu(trayMenu, screen.getCursorScreenPoint());
+}
+
+function registerHotkey() {
+  globalShortcut.unregisterAll();
+  const errors = [];
+  const bindings = [
+    [cfg.hotkey, showMenuAtCursor],
+    [cfg.disableHotkey, () => setDisabled(!disabled)],
+  ];
+  for (const [raw, action] of bindings) {
+    const key = (raw || '').trim();
+    if (!key) continue;
+    try {
+      if (!globalShortcut.register(key, action)) errors.push(`The shortcut "${key}" is in use by another app.`);
+    } catch (e) {
+      errors.push(`The shortcut "${key}" is not valid.`);
+    }
+  }
+  hotkeyError = errors.join(' ');
+  if (hotkeyError) console.error(hotkeyError);
+}
+
 function applyPinned() {
   tracker.setPinned(disabled ? [] : cfg.pinned);
 }
@@ -295,8 +343,7 @@ function setDisplay(display) {
 function buildMenu() {
   if (!tray) return;
   const displays = screen.getAllDisplays();
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
+  trayMenu = Menu.buildFromTemplate([
       { label: `MQTT ${status}`, enabled: false },
       { label: 'Pause', type: 'checkbox', checked: paused, click: (i) => setPaused(i.checked) },
       { label: 'Disable (pause and hide pinned)', type: 'checkbox', checked: disabled, click: (i) => setDisabled(i.checked) },
@@ -327,8 +374,8 @@ function buildMenu() {
       },
       { type: 'separator' },
       { label: 'Quit', role: 'quit' },
-    ]),
-  );
+  ]);
+  tray.setContextMenu(trayMenu);
 }
 
 ipcMain.handle('get-cameras', () => ({
@@ -345,7 +392,11 @@ ipcMain.handle('get-settings', async () => ({
     cameras: cfg.cameras,
     window: cfg.window,
     startAtLogin: !!cfg.startAtLogin,
+    hotkey: cfg.hotkey,
+    disableHotkey: cfg.disableHotkey,
   },
+  hotkeyError,
+  disabled,
   missing: config.missingSettings(cfg),
   cameras: allCameras(),
   zones: knownZones,
@@ -360,8 +411,12 @@ ipcMain.handle('save-settings', async (_e, settings) => {
   }
   config.saveSettings(configFile, settings, { passwordEnc });
   await reloadConfig();
-  return true;
+  return { hotkeyError };
 });
+
+ipcMain.handle('get-disabled', () => disabled);
+
+ipcMain.on('set-disabled', (_e, value) => setDisabled(!!value));
 
 ipcMain.on('set-pinned', (_e, camera, on) => togglePin(camera, on));
 
@@ -373,6 +428,7 @@ ipcMain.on('dismiss', (_e, camera) => {
 });
 
 app.whenReady().then(async () => {
+  if (!gotLock) return;
   if (process.platform === 'darwin') app.dock.hide();
   const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'tray.png'));
   tray = new Tray(icon.resize({ width: 16, height: 16 }));
@@ -381,6 +437,7 @@ app.whenReady().then(async () => {
   cfg = await loadConfig();
   applyPinned();
   applyLoginItem();
+  registerHotkey();
   buildMenu();
   connect();
   refreshCameras();
@@ -398,3 +455,5 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', (e) => e.preventDefault());
+
+app.on('will-quit', () => globalShortcut.unregisterAll());

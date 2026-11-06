@@ -11,8 +11,11 @@ function syncAnonymous() {
   $('mqtt-password').disabled = off;
 }
 
-function fill({ settings: s, cameras, zones, canLogin, encrypted, missing }) {
+function fill({ settings: s, cameras, zones, canLogin, encrypted, missing, disabled }) {
   loaded = s;
+  $('disabled').checked = !!disabled;
+  $('hotkey').value = s.hotkey || '';
+  $('disableHotkey').value = s.disableHotkey || '';
   for (const el of document.querySelectorAll('.bad')) el.classList.remove('bad');
   $('banner').hidden = missing.length === 0;
   $('banner').textContent = missing.length ? `Complete these settings to connect: ${missing.map((k) => LABEL[k]).join(', ')}.` : '';
@@ -89,15 +92,21 @@ function collect() {
       margin: Number($('win-margin').value),
     },
     startAtLogin: $('login').checked,
+    hotkey: $('hotkey').value.trim(),
+    disableHotkey: $('disableHotkey').value.trim(),
   };
 }
 
 $('save').addEventListener('click', async () => {
-  await window.popup.saveSettings(collect());
-  $('msg').textContent = 'Saved. The app uses the new settings now.';
+  const result = await window.popup.saveSettings(collect());
+  $('msg').textContent = result && result.hotkeyError ? `Saved. ${result.hotkeyError}` : 'Saved. The app uses the new settings now.';
   $('mqtt-password').value = '';
   fill(await window.popup.getSettings());
 });
 $('mqtt-anonymous').addEventListener('change', syncAnonymous);
 $('close').addEventListener('click', () => window.close());
+$('disabled').addEventListener('change', () => window.popup.setDisabled($('disabled').checked));
+window.addEventListener('focus', async () => {
+  $('disabled').checked = await window.popup.getDisabled();
+});
 window.popup.getSettings().then(fill);

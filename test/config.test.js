@@ -26,3 +26,23 @@ test('an anonymous broker needs no credentials', () => {
 test('an empty host or URL is reported', () => {
   assert.deepStrictEqual(missingSettings(cfg({ host: '', anonymous: true }, { baseUrl: '' })), ['host', 'baseUrl']);
 });
+
+test('the default config has a menu shortcut', () => {
+  assert.strictEqual(DEFAULTS.hotkey, 'CommandOrControl+Alt+Shift+F');
+});
+
+test('saveSettings stores the menu shortcut', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const { saveSettings } = require('../src/config');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cfg-'));
+  const file = path.join(dir, 'config.json');
+  saveSettings(file, { mqtt: { host: 'h' }, hotkey: 'Ctrl+Alt+K' });
+  assert.strictEqual(JSON.parse(fs.readFileSync(file, 'utf8')).hotkey, 'Ctrl+Alt+K');
+  fs.rmSync(dir, { recursive: true });
+});
+
+test('the default config has a disable shortcut', () => {
+  assert.strictEqual(DEFAULTS.disableHotkey, 'CommandOrControl+Alt+Shift+D');
+});

@@ -200,6 +200,21 @@ The app measures the area on the usable part of the display. This part excludes 
 
 To choose the display, use the tray item "Show on display".
 
+### Control
+
+| Field | Default | Meaning |
+|---|---|---|
+| Disable | off | Pauses detection and hides all pinned cameras. The change takes effect at once. The app does not save it. |
+| Menu shortcut | `CommandOrControl+Alt+Shift+F` | A global key combination that opens the tray menu at the mouse pointer. Leave it empty to turn it off. |
+| Disable shortcut | `CommandOrControl+Alt+Shift+D` | A global key combination that turns Disable on and off. Leave it empty to turn it off. |
+
+The **Settings** window and the **Pin cameras** window open on the display that shows the cameras.
+
+If you cannot see the tray, you have two ways to open the settings:
+
+- Press the menu shortcut. Then click **Settings...** in the menu.
+- Start the app a second time. The first copy opens the **Settings** window.
+
 ### System
 
 | Field | Default | Meaning |

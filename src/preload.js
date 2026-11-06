@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('popup', {
   dismiss: (camera) => ipcRenderer.send('dismiss', camera),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+  getDisabled: () => ipcRenderer.invoke('get-disabled'),
+  setDisabled: (value) => ipcRenderer.send('set-disabled', value),
   getCameras: () => ipcRenderer.invoke('get-cameras'),
   setPinned: (camera, on) => ipcRenderer.send('set-pinned', camera, on),
 });
